@@ -1,4 +1,5 @@
 export let deviceName = localStorage.getItem('deviceName');
+
 if (!deviceName) {
   const parser = new UAParser();
   const ua = parser.getResult();
@@ -17,15 +18,45 @@ if (!deviceName) {
     deviceName = 'Unknown Device';
 }
 
-export function setDeviceName(name) {
+function setDeviceName(name) {
   deviceName = name;
   showDeviceName();
   localStorage.setItem('deviceName', deviceName);
 }
 
-export function showDeviceName() {
+function showDeviceName() {
   const deviceNameElem = document.getElementById('device-name');
   if (deviceNameElem) {
     deviceNameElem.textContent = `You are known as ${deviceName}.`;
   }
 }
+
+showDeviceName();
+
+const changeNameButton = document.getElementById('change-name');
+const editNameDialog = document.getElementById('editNameDialog');
+
+changeNameButton.addEventListener('click', function () {
+  const editNameDialog = document.getElementById('editNameDialog');
+  editNameDialog.setAttribute('show', 1);
+  const autoFocus = editNameDialog.querySelector('[autofocus]');
+  if (autoFocus) {
+    autoFocus.textContent = '';
+    autoFocus.focus();
+  }
+});
+
+editNameDialog.querySelectorAll('[close]').forEach(el =>
+  el.addEventListener('click', e => {
+    editNameDialog.removeAttribute('show');
+    document.activeElement.blur();
+    window.blur();
+  })
+);
+
+const editNameForm = editNameDialog.querySelector('form');
+editNameForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const textInput = editNameDialog.querySelector('#textInput');
+  setDeviceName(textInput.innerText);
+});
