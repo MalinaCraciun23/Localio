@@ -19,6 +19,22 @@ function convertTypedArray(src, type) {
   return new type(buffer);
 }
 
+const sendBtn = document.getElementById('msger-send-btn');
+const msgerInput = document.getElementById('msger-input');
+const fileInput = document.getElementById('fileInput');
+
+function disableSend() {
+  sendBtn.disabled = true;
+  msgerInput.disabled = true;
+  fileInput.disabled = true;
+}
+
+function enableSend() {
+  sendBtn.disabled = false;
+  msgerInput.disabled = false;
+  fileInput.disabled = false;
+}
+
 ggwave_factory().then(function (obj) {
   ggwave = obj;
 });
@@ -94,10 +110,10 @@ export function stopCapture() {
   }
 }
 
-export function playMessage(msg) {
+export function playSound(str) {
   return new Promise((resolve, reject) => {
-    if (!msg) reject();
-
+    if (!str) reject();
+    disableSend()
     const capturing = !!recorder;
     const cb = callback;
     if (capturing) stopCapture();
@@ -105,7 +121,7 @@ export function playMessage(msg) {
     init();
 
     // generate audio waveform
-    const waveform = ggwave.encode(instance, msg, ggwave.TxProtocolId.GGWAVE_TX_PROTOCOL_AUDIBLE_FAST, 10)
+    const waveform = ggwave.encode(instance, str, ggwave.TxProtocolId.GGWAVE_TX_PROTOCOL_AUDIBLE_FAST, 10)
 
     // play audio
     const buf = convertTypedArray(waveform, Float32Array);
@@ -115,10 +131,43 @@ export function playMessage(msg) {
     source.buffer = buffer;
     source.connect(context.destination);
     source.start(0);
-    console.log(source)
     source.onended = function () {
       if (capturing) startCapture(cb);
+      enableSend();
       resolve();
     };
   });
+}
+
+function chunkSubstr(str, size) {
+  const numChunks = Math.ceil(str.length / size)
+  const chunks = new Array(numChunks)
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size)
+  }
+
+  return chunks
+}
+
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+
+export async function playMessage(msg) {
+  const chunks = chunkSubstr(msg, 100);
+  const firstChunk = chunks.shift();
+  await playSound(`m:${chunks.length + 1}:${firstChunk}`);
+  for (const chunk of chunks) {
+    await sleep(3150);
+    await playSound(chunk);
+  }
+}
+
+export async function playFile(fileName, fileType, b64File) {
+  const chunks = chunkSubstr(b64File, 100);
+  const firstChunk = chunks.shift();
+  await playSound(`f:${fileName}:${fileType}:${chunks.length + 1}:${firstChunk}`);
+  for (const chunk of chunks) {
+    await sleep(3150);
+    await playSound(chunk);
+  }
 }

@@ -1,6 +1,6 @@
 import { deviceName } from './deviceName.js';
 import { showElem } from './navigation.js';
-import { playMessage } from './sound.js';
+import { playSound } from './sound.js';
 import { setOtherName } from './chat.js'
 
 let worker = null;
@@ -17,7 +17,7 @@ const terminateWorker = (ev, prefix) => {
     const result = ev.data;
     setOtherName(prefix + result.data);
     const msger = document.getElementById("msger");
-    playMessage(deviceName).then(() => {
+    playSound(deviceName).then(() => {
       showElem(msger)
       video.srcObject.getTracks().forEach(function (track) {
         if (track.readyState == 'live' && track.kind === 'video') {

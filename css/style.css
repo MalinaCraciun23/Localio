@@ -502,6 +502,14 @@ button:disabled {
     border-bottom-right-radius: 0;
 }
 
+.msg-text {
+    word-wrap: break-word;
+}
+
+.msg-text a {
+    font-weight: bold;
+}
+
 .msger-form {
     display: flex;
     padding: 0.625rem;
@@ -537,4 +545,28 @@ button:disabled {
 
 .msger-chat {
     background-color: #ffffff;
+}
+
+#fileInput {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+#fileInput:focus + #fileLabel {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+#fileInput + #fileLabel * {
+    pointer-events: none;
+}
+
+#fileLabel {
+    cursor: pointer;
+    padding: 0;
+    margin: 0.3rem 0.3rem 0 0;
 }

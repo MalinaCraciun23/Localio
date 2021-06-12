@@ -3,6 +3,7 @@ import { connectionType, connectionMethod } from './connection.js';
 import './qrcode.js';
 import './qrscanner.js';
 import './chat.js';
+import './upload.js'
 
 /* Install Button */
 
