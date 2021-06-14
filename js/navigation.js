@@ -5,7 +5,7 @@ let currentElem = document.getElementById('connect-form');
 
 export function showElem(elem) {
   currentElem.classList.add('hidden');
-  window.setTimeout(function () {
+  currentElem.addEventListener('transitionend', () => {
     currentElem.hidden = true;
     elem.hidden = false;
     elem.offsetHeight;
@@ -13,5 +13,5 @@ export function showElem(elem) {
     const event = new Event('visible');
     elem.dispatchEvent(event);
     currentElem = elem;
-  }, 1000);
+  });
 }
