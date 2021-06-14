@@ -1,3 +1,4 @@
+import { encrypt, decrypt } from './crypto.js';
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
@@ -153,21 +154,25 @@ function chunkSubstr(str, size) {
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
 export async function playMessage(msg) {
-  const chunks = chunkSubstr(msg, 100);
+  const chunks = chunkSubstr(msg, 50);
   const firstChunk = chunks.shift();
-  await playSound(`m:${chunks.length + 1}:${firstChunk}`);
+  const encryptedFirstChunk = await encrypt(`m:${chunks.length + 1}:${firstChunk}`);
+  await playSound(encryptedFirstChunk);
   for (const chunk of chunks) {
     await sleep(3150);
-    await playSound(chunk);
+    const encryptedChunk = await encrypt(chunk);
+    await playSound(encryptedChunk);
   }
 }
 
 export async function playFile(fileName, fileType, b64File) {
-  const chunks = chunkSubstr(b64File, 100);
+  const chunks = chunkSubstr(b64File, 50);
   const firstChunk = chunks.shift();
-  await playSound(`f:${fileName}:${fileType}:${chunks.length + 1}:${firstChunk}`);
+  const encryptedFirstChunk = await encrypt(`f:${fileName}:${fileType}:${chunks.length + 1}:${firstChunk}`);
+  await playSound(encryptedFirstChunk);
   for (const chunk of chunks) {
     await sleep(3150);
-    await playSound(chunk);
+    const encryptedChunk = await encrypt(chunk);
+    await playSound(encryptedChunk);
   }
 }

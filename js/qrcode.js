@@ -1,5 +1,6 @@
 import { deviceName } from './deviceName.js';
 import { showElem } from './navigation.js';
+import { createSecretKey, decrypt } from './crypto.js';
 import { startCapture, stopCapture } from './sound.js';
 import { setOtherName } from './chat.js'
 
@@ -19,10 +20,12 @@ function displayQR(val) {
 
 const qrContainer = document.getElementById("qrcodeContainer");
 
-qrContainer.addEventListener('visible', function () {
-  displayQR(deviceName);
-  startCapture((res) => {
-    setOtherName(res);
+qrContainer.addEventListener('visible', async function () {
+  const key = await createSecretKey();
+  displayQR(`${deviceName.length}-${deviceName}${key}`);
+  startCapture(async (encryptedName) => {
+    const otherName = await decrypt(encryptedName);
+    setOtherName(otherName);
     stopCapture();
     const msger = document.getElementById("msger");
     showElem(msger);

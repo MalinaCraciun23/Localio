@@ -2,6 +2,7 @@ import { deviceName } from './deviceName.js';
 import { showElem } from './navigation.js';
 import { playSound } from './sound.js';
 import { setOtherName } from './chat.js'
+import { setSecretKey, encrypt } from './crypto.js'
 
 let worker = null;
 let video = null;
@@ -11,13 +12,21 @@ function initWorker() {
   worker.onmessage = (ev) => terminateWorker(ev, "");
 }
 
-const terminateWorker = (ev, prefix) => {
+const terminateWorker = async (ev, prefix) => {
   if (ev.data != null) {
     worker.terminate();
     const result = ev.data;
-    setOtherName(prefix + result.data);
-    const msger = document.getElementById("msger");
-    playSound(deviceName).then(() => {
+    let message = prefix + result.data;
+    const messageArr = message.split('-');
+    const nameLength = messageArr.shift();
+    message = messageArr.join('-');
+    const name = message.substring(0, nameLength);
+    setOtherName(name);
+    const secretKey = message.substring(nameLength);
+    setSecretKey(secretKey);
+    const encryptedName = await encrypt(deviceName);
+    playSound(encryptedName).then(() => {
+      const msger = document.getElementById("msger");
       showElem(msger)
       video.srcObject.getTracks().forEach(function (track) {
         if (track.readyState == 'live' && track.kind === 'video') {

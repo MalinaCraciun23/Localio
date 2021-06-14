@@ -1,8 +1,8 @@
 import { deviceName } from './deviceName.js';
 import { playMessage, startCapture } from './sound.js';
+import { decrypt } from './crypto.js';
 
 let otherName = '';
-
 
 export function setOtherName(name) {
   otherName = name;
@@ -103,29 +103,32 @@ msger.addEventListener('visible', function () {
   let chunksCount;
   let fileName;
   let fileType;
-  startCapture((msg) => {
-    if (chunks.length === 0) {
-      const msgArr = msg.split(':');
-      type = msgArr.shift();
-      if (type === 'm') {
-        chunksCount = Number(msgArr.shift());
-      } else if (type === 'f') {
-        fileName = msgArr.shift();
-        fileType = msgArr.shift();
-        chunksCount = Number(msgArr.shift());
+  startCapture(async (encryptedMessage) => {
+    const msg = await decrypt(encryptedMessage);
+    if (msg) {
+      if (chunks.length === 0) {
+        const msgArr = msg.split(':');
+        type = msgArr.shift();
+        if (type === 'm') {
+          chunksCount = Number(msgArr.shift());
+        } else if (type === 'f') {
+          fileName = msgArr.shift();
+          fileType = msgArr.shift();
+          chunksCount = Number(msgArr.shift());
+        }
+        chunks.push(msgArr.join(':'));
+      } else {
+        chunks.push(msg);
       }
-      chunks.push(msgArr.join(':'));
-    } else {
-      chunks.push(msg);
-    }
 
-    if (chunks.length === chunksCount) {
-      if (type === 'm') {
-        appendMessage(otherName, "left", chunks.join(''));
-      } else if (type === 'f') {
-        appendFile(otherName, "left", fileName, fileType, chunks.join(''));
+      if (chunks.length === chunksCount) {
+        if (type === 'm') {
+          appendMessage(otherName, "left", chunks.join(''));
+        } else if (type === 'f') {
+          appendFile(otherName, "left", fileName, fileType, chunks.join(''));
+        }
+        chunks = [];
       }
-      chunks = [];
     }
   });
 }, false);
