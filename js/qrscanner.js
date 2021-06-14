@@ -17,6 +17,8 @@ const terminateWorker = async (ev, prefix) => {
     worker.terminate();
     const result = ev.data;
     let message = prefix + result.data;
+    let id = message.slice(0, 6);
+    message = message.slice(6);
     const messageArr = message.split('-');
     const nameLength = messageArr.shift();
     message = messageArr.join('-');
@@ -25,7 +27,7 @@ const terminateWorker = async (ev, prefix) => {
     const secretKey = message.substring(nameLength);
     setSecretKey(secretKey);
     const encryptedName = await encrypt(deviceName);
-    playSound(encryptedName).then(() => {
+    playSound(`${id}${encryptedName}`).then(() => {
       const msger = document.getElementById("msger");
       showElem(msger)
       video.srcObject.getTracks().forEach(function (track) {
