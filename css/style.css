@@ -188,12 +188,12 @@ a {
 
 form {
     opacity: 1;
-    transition: opacity 1500ms;
+    transition: opacity 500ms;
 }
 
 form.hidden {
     opacity: 0;
-    transition: opacity 1500ms, left 0ms 1500s;
+    transition: opacity 500ms, left 0ms 500s;
 }
 
 .option {
@@ -404,12 +404,12 @@ button:disabled {
 
 .qrcontainer {
     opacity: 1;
-    transition: opacity 1500ms;
+    transition: opacity 500ms;
     max-height: 55vh;
 }
 
 .hidden {
-    transition: opacity 1500ms, left 0ms 1500s;
+    transition: opacity 500ms, left 0ms 500s;
 }
 
 .qrcontainer svg path {
@@ -419,7 +419,7 @@ button:disabled {
 
 .canvas {
     opacity: 1;
-    transition: opacity 1500ms;
+    transition: opacity 500ms;
 }
 
 .msger {
@@ -436,7 +436,7 @@ button:disabled {
     background: #ffffff;
     box-shadow: 0 0.9375rem 0.9375rem -0.3125rem rgba(0, 0, 0, 0.2);
     opacity: 1;
-    transition: opacity 1500ms;
+    transition: opacity 500ms;
 }
 
 .msger-chat {
