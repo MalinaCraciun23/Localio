@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from './crypto.js';
+import { encrypt } from './crypto.js';
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;

@@ -1,4 +1,6 @@
+import { connectionType } from './connection.js';
 import { deviceName } from './deviceName.js';
+import { sendRTCName, sendRTCMessage, handleRTCMessage } from './webrtc.js';
 import { playMessage, startCapture } from './sound.js';
 import { decrypt } from './crypto.js';
 
@@ -86,18 +88,36 @@ export function appendFile(name, side, fileName, fileType, b64) {
   msgerChat.scrollTop += 500;
 }
 
-msgerForm.addEventListener("submit", event => {
+msgerForm.addEventListener("submit", async event => {
+  const handleSendMessage = connectionType === 'ONLINE' ? sendRTCMessage : playMessage;
   event.preventDefault();
   const msg = msgerInput.value;
   if (msg) {
-    playMessage(msg).then(() => {
-      appendMessage(deviceName, "right", msg);
-      msgerInput.value = "";
-    });
+    await handleSendMessage(msg);
+    appendMessage(deviceName, "right", msg);
+    msgerInput.value = "";
   }
 });
 
-msger.addEventListener('visible', function () {
+function handleOnlineReceive() {
+  handleRTCMessage((msg) => {
+    if (msg.startsWith('name:')) {
+      setOtherName(msg.replace('name:', ''));
+    } else {
+      const msgArr = msg.split(':');
+      const type = msgArr.shift();
+      if (type === 'm') {
+        appendMessage(otherName, "left", msgArr.join(':'));
+      } else if (type === 'f') {
+        const fileName = msgArr.shift();
+        const fileType = msgArr.shift();
+        appendFile(otherName, "left", fileName, fileType, msgArr.join(':'));
+      }
+    }
+  })
+}
+
+function handleOfflineReceive() {
   let chunks = [];
   let type;
   let chunksCount;
@@ -131,4 +151,14 @@ msger.addEventListener('visible', function () {
       }
     }
   });
+}
+
+msger.addEventListener('visible', async function () {
+  const handleReceive = connectionType === 'ONLINE' ? handleOnlineReceive : handleOfflineReceive;
+  await handleReceive();
+  setTimeout(() => {
+    if (connectionType === 'ONLINE') {
+      sendRTCName(deviceName);
+    }
+  }, 800);
 }, false);

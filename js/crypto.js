@@ -1,6 +1,6 @@
-const buffToBase64 = (buff) => btoa(String.fromCharCode.apply(null, buff));
+export const buffToBase64 = (buff) => btoa(String.fromCharCode.apply(null, buff));
 
-const base64ToBuff = (b64) =>
+export const base64ToBuff = (b64) =>
   Uint8Array.from(atob(b64), (c) => c.charCodeAt(null));
 
 const enc = new TextEncoder();

@@ -1,11 +1,13 @@
+import { connectionType } from './connection.js';
 import { deviceName } from './deviceName.js';
 import { showElem } from './navigation.js';
 import { createSecretKey, decrypt } from './crypto.js';
+import { createSender, setAnswer } from './webrtc.js';
 import { startCapture, stopCapture } from './sound.js';
 import { generateId } from './crypto.js';
 import { setOtherName } from './chat.js'
 
-function displayQR(val) {
+export function displayQR(val) {
   const QRGen = qrcodegen.QrCode;
   const qrCode = document.getElementById("qrcode");
   const encodeFunc = val instanceof Uint8Array
@@ -21,9 +23,25 @@ function displayQR(val) {
 
 const qrContainer = document.getElementById("qrcodeContainer");
 
-qrContainer.addEventListener('visible', async function () {
-  const key = await createSecretKey();
+async function handleQrVisibleOnline() {
   const id = generateId(6);
+  createSender(id, () => {
+    stopCapture();
+    const msger = document.getElementById("msger");
+    showElem(msger);
+  });
+  startCapture(async (msg) => {
+    const receivedId = msg.slice(0, 6);
+    if (id === receivedId) {
+      const answer = msg.slice(6);
+      setAnswer(answer);
+    }
+  })
+}
+
+async function handleQrVisibleOffline() {
+  const id = generateId(6);
+  const key = await createSecretKey();
   displayQR(`${id}${deviceName.length}-${deviceName}${key}`);
   startCapture(async (msg) => {
     const receivedId = msg.slice(0, 6);
@@ -36,4 +54,9 @@ qrContainer.addEventListener('visible', async function () {
       showElem(msger);
     }
   })
+}
+
+qrContainer.addEventListener('visible', async function () {
+  const handleVisible = connectionType === 'ONLINE' ? handleQrVisibleOnline : handleQrVisibleOffline;
+  await handleVisible();
 }, false);

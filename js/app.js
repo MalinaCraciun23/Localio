@@ -1,9 +1,11 @@
-import { deviceName } from './deviceName.js';
-import { connectionType, connectionMethod } from './connection.js';
-import './qrcode.js';
-import './qrscanner.js';
-import './chat.js';
-import './upload.js'
+window.addEventListener('DOMContentLoaded', () => {
+  import('./deviceName.js');
+  import('./connection.js');
+  import('./qrcode.js');
+  import('./qrscanner.js');
+  import('./chat.js');
+  import('./upload.js');
+});
 
 /* Install Button */
 

@@ -1,5 +1,7 @@
+import { connectionType } from './connection.js';
 import { deviceName } from './deviceName.js';
 import { showElem } from './navigation.js';
+import { createReceiver, createAnswer } from './webrtc.js';
 import { playSound } from './sound.js';
 import { setOtherName } from './chat.js'
 import { setSecretKey, encrypt } from './crypto.js'
@@ -12,30 +14,47 @@ function initWorker() {
   worker.onmessage = (ev) => terminateWorker(ev, "");
 }
 
+async function handleSoundMessageOnline(id, message) {
+  createReceiver(id, () => {
+    const msger = document.getElementById("msger");
+    showElem(msger);
+    video.srcObject.getTracks().forEach(function (track) {
+      if (track.readyState == 'live' && track.kind === 'video') {
+        track.stop();
+      }
+    });
+  });
+  createAnswer(message);
+}
+
+async function handleSoundMessageOffline(id, result) {
+  const resultArr = result.split('-');
+  const messageLength = resultArr.shift();
+  result = resultArr.join('-');
+  const message = result.substring(0, messageLength);
+  const secretKey = result.substring(messageLength);
+  setOtherName(message);
+  setSecretKey(secretKey);
+  const encryptedName = await encrypt(deviceName);
+  playSound(`${id}${encryptedName}`).then(() => {
+    const msger = document.getElementById("msger");
+    showElem(msger);
+    video.srcObject.getTracks().forEach(function (track) {
+      if (track.readyState == 'live' && track.kind === 'video') {
+        track.stop();
+      }
+    });
+  });
+}
+
 const terminateWorker = async (ev, prefix) => {
   if (ev.data != null) {
+    const handleSoundMessage = connectionType === 'ONLINE' ? handleSoundMessageOnline : handleSoundMessageOffline;
     worker.terminate();
-    const result = ev.data;
-    let message = prefix + result.data;
-    let id = message.slice(0, 6);
-    message = message.slice(6);
-    const messageArr = message.split('-');
-    const nameLength = messageArr.shift();
-    message = messageArr.join('-');
-    const name = message.substring(0, nameLength);
-    setOtherName(name);
-    const secretKey = message.substring(nameLength);
-    setSecretKey(secretKey);
-    const encryptedName = await encrypt(deviceName);
-    playSound(`${id}${encryptedName}`).then(() => {
-      const msger = document.getElementById("msger");
-      showElem(msger)
-      video.srcObject.getTracks().forEach(function (track) {
-        if (track.readyState == 'live' && track.kind === 'video') {
-          track.stop();
-        }
-      });
-    });
+    let result = prefix + ev.data.data;
+    let id = result.slice(0, 6);
+    result = result.slice(6);
+    await handleSoundMessage(id, result);
   }
 };
 
