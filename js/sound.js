@@ -167,9 +167,8 @@ export async function playMessage(msg) {
 
 export async function playFile(fileName, fileType, b64File) {
   const chunks = chunkSubstr(b64File, 50);
-  const firstChunk = chunks.shift();
-  const encryptedFirstChunk = await encrypt(`f:${fileName}:${fileType}:${chunks.length + 1}:${firstChunk}`);
-  await playSound(encryptedFirstChunk);
+  const encryptedFileInfo = await encrypt(`f:${fileName}:${fileType}:${chunks.length}`);
+  await playSound(encryptedFileInfo);
   for (const chunk of chunks) {
     await sleep(3150);
     const encryptedChunk = await encrypt(chunk);
