@@ -111,7 +111,7 @@ export function stopCapture() {
   }
 }
 
-export function playSound(str) {
+export function playSound(str, audible = false) {
   return new Promise((resolve, reject) => {
     if (!str) reject();
     disableSend()
@@ -122,7 +122,8 @@ export function playSound(str) {
     init();
 
     // generate audio waveform
-    const waveform = ggwave.encode(instance, str, ggwave.TxProtocolId.GGWAVE_TX_PROTOCOL_AUDIBLE_FAST, 10)
+    const protocol = audible ? ggwave.TxProtocolId.GGWAVE_TX_PROTOCOL_AUDIBLE_FAST : ggwave.TxProtocolId.GGWAVE_TX_PROTOCOL_ULTRASOUND_FAST;
+    const waveform = ggwave.encode(instance, str, protocol, 10)
 
     // play audio
     const buf = convertTypedArray(waveform, Float32Array);

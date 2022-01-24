@@ -1,4 +1,3 @@
-import { deviceName } from './deviceName.js';
 import { connectionMethod } from './connection.js';
 import { buffToBase64, base64ToBuff } from './crypto.js'
 import { displayQR } from './qrcode.js';
@@ -8,7 +7,7 @@ let ips = [];
 getIPs(ip => ips.push(ip));
 
 const offerTemplate = `v=0
-o=- 1337 0 IN IP4 0.0.0.0
+o=- 0 0 IN IP4 0.0.0.0
 s=-
 t=0 0
 a=sendrecv
@@ -33,7 +32,7 @@ a=setup:actpass
 a=max-message-size:1073741823`;
 
 const answerTemplate = `v=0
-o=- 1338 0 IN IP4 0.0.0.0
+o=- 1 0 IN IP4 0.0.0.0
 s=-
 t=0 0
 a=sendrecv
@@ -207,7 +206,7 @@ export function createReceiver(id, cb) {
   receiverConnection.onicecandidate = async e => {
     if (e.candidate) return;
     const compressedSDP = minifySDP(receiverConnection.localDescription.sdp);
-    playSound(`${id}${compressedSDP}`);
+    playSound(`${id}${compressedSDP}`, true);
   }
 
   receiverConnection.ondatachannel = e => {

@@ -118,7 +118,7 @@ function handleOnlineReceive() {
 }
 
 function handleOfflineReceive() {
-  let chunks;
+  let chunks = [];
   let type;
   let chunksCount;
   let fileName;
@@ -126,11 +126,13 @@ function handleOfflineReceive() {
   startCapture(async (encryptedMessage) => {
     const msg = await decrypt(encryptedMessage);
     if (msg) {
-      if (!chunks) {
+      if (chunks.length === 0) {
         const msgArr = msg.split(':');
         type = msgArr.shift();
+        console.log(msgArr)
         if (type === 'm') {
           chunksCount = Number(msgArr.shift());
+          console.log(msgArr)
           chunks = [msgArr.join(':')];
         } else if (type === 'f') {
           fileName = msgArr.shift();

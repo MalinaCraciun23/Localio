@@ -36,7 +36,7 @@ async function handleSoundMessageOffline(id, result) {
   setOtherName(message);
   setSecretKey(secretKey);
   const encryptedName = await encrypt(deviceName);
-  playSound(`${id}${encryptedName}`).then(() => {
+  playSound(`${id}${encryptedName}`, true).then(() => {
     const msger = document.getElementById("msger");
     showElem(msger);
     video.srcObject.getTracks().forEach(function (track) {
