@@ -149,7 +149,7 @@ function chunkSubstr(str, size) {
     chunks[i] = str.substr(o, size)
   }
 
-  return chunks
+  return chunks;
 }
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))

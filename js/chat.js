@@ -100,25 +100,40 @@ msgerForm.addEventListener("submit", async event => {
 });
 
 function handleOnlineReceive() {
+  let chunks;
+  let type;
+  let chunksCount;
+  let fileName;
+  let fileType;
   handleRTCMessage((msg) => {
-    if (msg.startsWith('name:')) {
-      setOtherName(msg.replace('name:', ''));
-    } else {
-      const msgArr = msg.split(':');
-      const type = msgArr.shift();
-      if (type === 'm') {
-        appendMessage(otherName, "left", msgArr.join(':'));
-      } else if (type === 'f') {
-        const fileName = msgArr.shift();
-        const fileType = msgArr.shift();
-        appendFile(otherName, "left", fileName, fileType, msgArr.join(':'));
+    if (!chunks) {
+      if (msg.startsWith('name:')) {
+        setOtherName(msg.replace('name:', ''));
+      } else {
+        const msgArr = msg.split(':');
+        type = msgArr.shift();
+        if (type === 'm') {
+          appendMessage(otherName, "left", msgArr.join(':'));
+        } else if (type === 'f') {
+          fileName = msgArr.shift();
+          fileType = msgArr.shift();
+          chunksCount = Number(msgArr.shift());
+          chunks = [];
+        }
       }
+    } else {
+      chunks.push(msg);
+    }
+
+    if (chunks && chunks.length === chunksCount) {
+      appendFile(otherName, "left", fileName, fileType, chunks.join(''));
+      chunks = null;
     }
   })
 }
 
 function handleOfflineReceive() {
-  let chunks = [];
+  let chunks;
   let type;
   let chunksCount;
   let fileName;
@@ -126,13 +141,11 @@ function handleOfflineReceive() {
   startCapture(async (encryptedMessage) => {
     const msg = await decrypt(encryptedMessage);
     if (msg) {
-      if (chunks.length === 0) {
+      if (!chunks) {
         const msgArr = msg.split(':');
         type = msgArr.shift();
-        console.log(msgArr)
         if (type === 'm') {
           chunksCount = Number(msgArr.shift());
-          console.log(msgArr)
           chunks = [msgArr.join(':')];
         } else if (type === 'f') {
           fileName = msgArr.shift();
@@ -144,13 +157,13 @@ function handleOfflineReceive() {
         chunks.push(msg);
       }
 
-      if (chunks.length === chunksCount) {
+      if (chunks && chunks.length === chunksCount) {
         if (type === 'm') {
           appendMessage(otherName, "left", chunks.join(''));
         } else if (type === 'f') {
           appendFile(otherName, "left", fileName, fileType, chunks.join(''));
         }
-        chunks = [];
+        chunks = null;
       }
     }
   });

@@ -265,14 +265,35 @@ export function sendRTCMessage(msg) {
   }
 }
 
-export function sendRTCFile(fileName, fileType, b64) {
+function chunkSubstr(str, size) {
+  const numChunks = Math.ceil(str.length / size)
+  const chunks = new Array(numChunks)
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size)
+  }
+
+  return chunks;
+}
+
+export async function sendRTCFile(fileName, fileType, b64) {
+  let channel;
   switch (connectionMethod) {
     case 'SHOW CODE':
-      senderChannel.send(`f:${fileName}:${fileType}:${b64}`);
+      channel = senderChannel;
       break;
     case 'SCAN CODE':
-      receiverChannel.send(`f:${fileName}:${fileType}:${b64}`);
+      channel = receiverChannel;
       break;
+  }
+
+  const chunks = chunkSubstr(b64, 8000);
+  channel.send(`f:${fileName}:${fileType}:${chunks.length}`);
+  for (const chunk of chunks) {
+    const threshold = channel.bufferedAmount;
+    channel.send(chunk);
+    channel.bufferedAmountLowThreshold = threshold;
+    await new Promise(r => channel.addEventListener("bufferedamountlow", r));
   }
 }
 
